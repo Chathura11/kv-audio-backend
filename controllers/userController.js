@@ -1,6 +1,7 @@
 import User from "../models/user.js"
 import bcrypt from "bcrypt"
 import jwt from "jsonwebtoken"
+import dotenv from 'dotenv'
 
 export function userRegister(req,res){
     const newUser = req.body
@@ -34,7 +35,7 @@ export function loginUser(req,res){
                     lastname : user.lastname,
                     email:user.email,
                     role:user.role
-                },"skyrek secret key")
+                },process.env.JWT_SECRET_KEY)
 
                 res.status(200).json({message:"login successful!",token:token})
             }else{
