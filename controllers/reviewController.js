@@ -26,22 +26,36 @@ export function addReview(req,res){
 
 }
 
-export function getReviews(req,res){
+export async function getReviews(req,res){
     const user = req.user;
 
-    if(user == null || user.role != "admin"){
-        Review.find({isApproved:true}).then((reviews)=>{
-            res.status(200).json(reviews)
-        })
-
-        return
+    try{
+        if(user.role == "admin"){
+            const reviews = await Review.find();
+            res.status(200).json(reviews);
+        }else{
+            const reviews = await Review.find({isApproved:true});
+            res.status(200).json(reviews);
+        }
+    }catch(error){
+        res.status(500).json({error:error})
     }
 
-    if(user.role == "admin"){
-        Review.find().then((reviews)=>{
-            res.status(200).json(reviews)
-        })
-    }
+    //we can use above code instead below code segment
+
+    // if(user == null || user.role != "admin"){
+    //     Review.find({isApproved:true}).then((reviews)=>{
+    //         res.status(200).json(reviews)
+    //     })
+
+    //     return
+    // }
+
+    // if(user.role == "admin"){
+    //     Review.find().then((reviews)=>{
+    //         res.status(200).json(reviews)
+    //     })
+    // }
 }
 
 export function deleteReview(req,res){
