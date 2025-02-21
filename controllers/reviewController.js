@@ -41,7 +41,7 @@ export async function getReviews(req,res){
         res.status(500).json({error:error})
     }
 
-    //we can use above code instead below code segment
+    //we can use above code instead below code segment by using async await
 
     // if(user == null || user.role != "admin"){
     //     Review.find({isApproved:true}).then((reviews)=>{
