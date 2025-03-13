@@ -39,7 +39,7 @@ export function loginUser(req,res){
                     phone:user.phone
                 },process.env.JWT_SECRET_KEY)
 
-                res.status(200).json({message:"login successful!",token:token})
+                res.status(200).json({message:"login successful!",token:token,user:user})
             }else{
                 res.status(401).json({message:"login failed!"})
             }
