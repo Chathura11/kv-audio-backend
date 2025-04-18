@@ -1,5 +1,6 @@
 import Order from "../models/order.js";
 import Product from "../models/product.js";
+import { isItAdmin, isItCustomer } from "./userController.js";
 
 export async function CreateOrder(req,res){
     const data = req.body;
@@ -121,5 +122,57 @@ export async function GetQuotation(req,res){
         res.status(200).json({message:"Order Quotation!",total:orderInfo.totalAmount});
     } catch (error) {
         res.status(500).json({message:"Failed to create order quotation!"});
+    }
+}
+
+export async function GetOrders(req,res){
+
+    if(isItCustomer(req)){
+        try {
+            const orders = await Order.find({email:req.user.email})
+
+            res.status(200).json(orders);
+
+        } catch (error) {
+            res.status(500).json({message:"Failed to get order list!"})
+        }
+    }else if(isItAdmin(req)){
+        try {
+            const orders = await Order.find();
+            res.status(200).json(orders);
+        } catch (error) {
+            res.status(500).json({message:"Failed to get order list!"})
+        }
+    }else{
+        res.status(403).json({message:"Unauthorized!"})
+    }
+
+}
+
+
+export async function ApproveOrRejectOrder(req,res){
+    const orderId = req.params.orderId;
+    const status = req.body.status;
+
+    if(isItAdmin(req)){
+        try {
+            const order = await Order.findOne({orderId:orderId});
+
+            if(order == null){
+                res.status(404).json({message:"Order not found!"});
+                return;
+                
+            }
+
+            await Order.updateOne({orderId:orderId},{status:status});
+
+            res.status(200).json({message:"Order approved/rejected successfully!"})
+
+
+        } catch (error) {
+            res.status(500).json({message:"Failed to changed status!"})
+        }
+    }else{
+        res.status(403).json({message:"Unauthorized!"})
     }
 }
