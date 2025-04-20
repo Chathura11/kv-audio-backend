@@ -42,6 +42,11 @@ const UserSchema =new mongoose.Schema({
         type:String,
         required:true,
         default:"https://w7.pngwing.com/pngs/205/731/png-transparent-default-avatar-thumbnail.png"
+    },
+    emailVerified:{
+        type:Boolean,
+        required:true,
+        default:false
     }
 
 });
