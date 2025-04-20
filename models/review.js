@@ -24,7 +24,7 @@ const reviewSchema = new mongoose.Schema({
         default:Date.now()
     },
     isApproved:{
-        type:String,
+        type:Boolean,
         required:true,
         default:false
     },
@@ -32,6 +32,14 @@ const reviewSchema = new mongoose.Schema({
         type:String,
         required:true,
         default:"https://w7.pngwing.com/pngs/205/731/png-transparent-default-avatar-thumbnail.png"
+    },
+    product:{
+        type:String,
+        required:true
+    },
+    productName:{
+        type:String,
+        required:true
     }
 })
 

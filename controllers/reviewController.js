@@ -30,7 +30,7 @@ export async function getReviews(req,res){
     const user = req.user;
 
     try{
-        if(user.role == "admin"){
+        if(user && user.role == "admin"){
             const reviews = await Review.find();
             res.status(200).json(reviews);
         }else{
@@ -60,8 +60,7 @@ export async function getReviews(req,res){
 
 export function deleteReview(req,res){
     const email =  req.params.email;
-
-    if(res.user == null){
+    if(req.user == null){
         res.status(401).json("Unauthorized.Pls log in");
         return;
     }
