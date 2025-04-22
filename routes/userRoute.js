@@ -1,5 +1,5 @@
 import express from "express";
-import { BlockOrUnblockUser, GetAllUsers, GetUser, LoginWithGoogle, SendOTP, VerifyOTP, loginUser, userRegister } from "../controllers/userController.js";
+import { BlockOrUnblockUser, GetAllUsers, GetUser, LoginWithGoogle, SendOTP, UpdateUser, VerifyOTP, loginUser, userRegister } from "../controllers/userController.js";
 
 const userRouter  = express.Router();
 
@@ -12,6 +12,8 @@ userRouter.get('/all',GetAllUsers);
 userRouter.get('/',GetUser);
 
 userRouter.put('/block/:email',BlockOrUnblockUser);
+
+userRouter.put('/edit/:email',UpdateUser);
 
 userRouter.post('/google',LoginWithGoogle);
 

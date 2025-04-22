@@ -65,6 +65,56 @@ export function loginUser(req,res){
     })
 }
 
+export async function UpdateUser(req,res){
+
+    const email = req.params.email;
+
+    if(req.user == null){
+        return res.status(403).json({message:"Unauthorized!"});
+    }
+
+    const data = req.body;
+
+    try {
+        const user = await User.findOne({email:email})
+
+        if(user ==null){
+            res.status(404).json({message:"User not found"})
+        }else{
+            if(user.isBlocked){
+                res.status(403).json({message:"Your account is blocked.Please contact the admin!"})
+                return;
+            }
+
+            let newData={
+                password : user.password,
+                firstname: data.firstname,
+                lastname :data.lastname,
+                address : data.address,
+                phone : data.phone,
+                profilePicture : data.profilePicture,           
+            }
+
+            if (data.password && data.newPassword) {
+                const isPasswordCorrect = bcrypt.compareSync(data.password, user.password);
+                if (isPasswordCorrect) {
+                    newData.password = bcrypt.hashSync(data.newPassword, 10);
+                } else {
+                    return res.status(404).json({message:"Invalid password!"});
+                }
+            }       
+         
+            await User.updateOne({email:email},newData);
+
+            res.status(200).json({message:"User updated successfully!"});
+
+        }
+
+    } catch (error) {
+        res.status(500).json({message:"Failed to update user!"})
+    }
+}
+
 export function isItAdmin(req){
     let isAdmin = false;
     
@@ -128,9 +178,29 @@ export async function BlockOrUnblockUser(req,res){
     
 }
 
-export function GetUser(req,res){
+export async function GetUser(req,res){
     if(req.user != null){
-        res.status(200).json(req.user);
+
+        try {
+            const user = await User.findOne({email:req.user.email});
+
+            const userData ={
+                email : user.email,
+                isBlocked:user.isBlocked,
+                role:user.role,
+                firstname:user.firstname,
+                lastname:user.lastname,
+                address:user.address,
+                phone:user.phone,
+                profilePicture:user.profilePicture,
+                emailVerified:user.emailVerified
+            }
+
+            res.status(200).json(userData);
+
+        } catch (error) {
+            res.status(500).json({message:'Failed to load user!'})
+        }
     }else{
         res.status(403).json({message:"Unauthorized!"});
     }
