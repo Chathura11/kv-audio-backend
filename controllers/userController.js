@@ -381,3 +381,77 @@ export async function ChangeUserPassword(req,res){
         }
     }
 }
+
+export async function ForgotPasswordSendOTP(req,res){
+
+    const email = req.params.email;
+
+    try {
+        const user =await User.findOne({email:email});
+        if(user == null){
+            return res.status(404).json({message:"User not found!"});
+        }
+    } catch (error) {
+        return res.status(500).json({message:"Failed to load user!"});
+    }
+
+    const otp = Math.floor(Math.random()*9000)+1000;
+
+    const newOPT = new OTP({
+        email:email,
+        otp:otp
+    })
+
+    await newOPT.save();
+    
+
+    const message={
+        from :"chathuraasela11@gmail.com",
+        to :email,
+        subject :"Validating OTP",
+        text : "Your otp code is " + otp
+    }
+
+    transport.sendMail(message,(err,info)=>{
+
+        if(err){
+            res.status(500).json({message:"Failed to send OTP!"})
+        }else{
+            res.status(200).json({message:"OTP sent successfully!"})
+        }
+    })
+}
+
+export async function ForgotPasswordVerifyOTP(req,res){
+    
+    const email = req.params.email
+
+    try {
+        const user =await User.findOne({email:email});
+        if(user == null){
+            return res.status(404).json({message:"User not found!"});
+        }
+    } catch (error) {
+        return res.status(500).json({message:"Failed to load user!"});
+    }
+
+    const code = req.body.code
+
+    const otp = await OTP.findOne({
+        email : email,
+        otp : code
+    })
+
+    if(otp == null){
+        res.status(404).json({message:"Invaid OTP"});
+    }else{
+        await OTP.deleteOne({
+            email : email,
+            otp : code
+        })
+
+        await User.updateOne({email:email},{emailVerified:true})
+
+        res.status(200).json({message:"Email verified successfully!"});
+    }
+}
