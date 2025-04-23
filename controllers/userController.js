@@ -322,3 +322,62 @@ export async function VerifyOTP(req,res){
         res.status(200).json({message:"Email verified successfully!"});
     }
 }
+
+export async function ForgotPassword(req, res) {
+    const email = req.params.email;
+    const tempPassword = Math.random().toString(36).slice(-10);
+
+    const message = {
+        from: "chathuraasela11@gmail.com",
+        to: email,
+        subject: "Forgot Password",
+        text: "Your temporary password is " + tempPassword,
+    };
+
+    const user = await User.findOne({email:email})
+
+    if(user == null){
+        return res.status(404).json({message:'User not found!'});
+    }
+
+    transport.sendMail(message, async (err, info) => {
+        if (err) {
+            res.status(500).json({ message: "Failed to send temporary password!" });
+        } else {
+            const password = bcrypt.hashSync(tempPassword, 10);
+            try {
+                await User.updateOne({ email: email }, { password: password });
+                res.status(200).json({ message: "Temporary password sent successfully!" });
+            } catch (updateErr) {
+                res.status(500).json({ message: "Email sent, but failed to update password!" });
+            }
+        }
+    });
+}
+
+export async function ChangeUserPassword(req,res){
+    const email = req.params.email;
+    const data = req.body;
+
+    const user = await User.findOne({email:email})
+
+    if(user == null){
+        return res.status(404).json({message:"User not found!"});
+    }else{
+        
+        const isPasswordCorrect = bcrypt.compareSync(data.password,user.password);
+
+        if(isPasswordCorrect){
+            
+            const password = bcrypt.hashSync(data.newPassword,10)
+            try{
+                await User.updateOne({email:email},{password : password});
+                res.status(200).json({ message: "Password changed successfully!" });
+            }catch(error){
+                res.status(500).json({ message: "Failed to change password!" });
+            }
+        }else{
+            return res.status(401).json({message:"Invalid password!"});
+        }
+    }
+}
